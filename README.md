@@ -7,6 +7,7 @@ A Python tool to archive YouTube videos and playlists by downloading them in the
 - Download YouTube videos in the highest available quality (up to 4K).
 - Download entire YouTube playlists.
 - Outputs files in `.mp4` format for easy compatibility.
+- **Automatic retry** on download failures due to bot detection or temporary issues.
 
 ## Requirements
 
