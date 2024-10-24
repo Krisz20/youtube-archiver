@@ -15,6 +15,7 @@ def download_video(video_id, output_path, retries=3, wait_time=60):
                 'format': 'bestvideo[height<=2160]+bestaudio/best',
                 'outtmpl': os.path.join(output_path, '%(title)s.%(ext)s'),
                 'merge_output_format': 'mp4',
+                'ignoreerrors': True,
                 'postprocessors': [
                     {
                         'key': 'EmbedThumbnail',
@@ -49,6 +50,7 @@ def download_playlist(playlist_id, output_path, retries=3, wait_time=60):
                 'format': 'bestvideo[height<=2160]+bestaudio/best',
                 'outtmpl': os.path.join(output_path, '%(playlist)s/%(title)s.%(ext)s'),
                 'merge_output_format': 'mp4',
+                'ignoreerrors': True,
                 'postprocessors': [
                     {
                         'key': 'EmbedThumbnail',
