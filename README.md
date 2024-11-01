@@ -6,6 +6,7 @@ A Python tool to archive YouTube videos and playlists by downloading them in the
 
 - Download YouTube videos in the highest available quality (up to 4K).
 - Download entire YouTube playlists.
+- Download all videos from a YouTube channel.
 - Outputs files in `.mp4` format for easy compatibility.
 - **Automatic retry** on download failures due to bot detection or temporary issues.
 
@@ -26,11 +27,13 @@ Before running the project, ensure you have the following installed:
 - Extract the contents and add the `bin` folder to your system's PATH environment variable.
 
 Alternatively, you can install it using **Chocolatey** (if installed):
+
 ```bash
 choco install ffmpeg
 ```
 
 On **macOS**, you can install FFmpeg using **Homebrew**:
+
 ```bash
 brew install ffmpeg
 ```
@@ -40,17 +43,20 @@ brew install ffmpeg
 Run the script with the following format:
 
 ```bash
-python youtube_archiver.py [video|playlist] <YouTube_ID> <output_path>
+python youtube_archiver.py [video|playlist|channel] <ID> <output_path>
 ```
 
 ### Options
 
 - **video**: Downloads a single video.
 - **playlist**: Downloads an entire playlist.
+- **channel**: Downloads all videos from a channel.
 
-The `<YouTube_ID>` refers to either:
+The `<ID>` refers to either:
+
 - The video ID for individual videos.
 - The playlist ID for playlists.
+- The channel ID for channels.
 
 The `<output_path>` is the directory where the downloaded videos will be saved.
 
@@ -58,7 +64,7 @@ The `<output_path>` is the directory where the downloaded videos will be saved.
 
 ### No Sound in Windows Media Player
 
-If you don't hear any sound while playing the video in **Windows Media Player**, it may be due to incompatibility with certain codecs used in the downloaded video file. 
+If you don't hear any sound while playing the video in **Windows Media Player**, it may be due to incompatibility with certain codecs used in the downloaded video file.
 
 To fix this, use a different media player like **VLC**:
 
