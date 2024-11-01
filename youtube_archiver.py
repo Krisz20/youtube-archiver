@@ -78,17 +78,55 @@ def download_playlist(playlist_id, output_path, retries=3, wait_time=60):
                 log(f"Retrying in {wait_time} seconds...")
                 time.sleep(wait_time)
 
+def download_channel(channel_id, output_path, retries=3, wait_time=60):
+    channel_url = f'https://www.youtube.com/c/{channel_id}'
+
+    for attempt in range(retries):
+        try:
+            ydl_opts = {
+                'format': 'bestvideo[height<=2160]+bestaudio/best',
+                'outtmpl': os.path.join(output_path, '%(uploader)s/%(title)s.%(ext)s'),
+                'merge_output_format': 'mp4',
+                'ignoreerrors': True,
+                'concurrent_fragment_downloads': 32,
+                'postprocessors': [
+                    {
+                        'key': 'EmbedThumbnail',
+                        'already_have_thumbnail': False
+                    },
+                    {
+                        'key': 'FFmpegMetadata',
+                        'add_chapters': True,
+                        'add_infojson': 'if_exists',
+                        'add_metadata': True
+                    }
+                ],
+                'writethumbnail': True
+            }
+
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([channel_url])
+            log(f"Downloaded all videos from channel: {channel_url}")
+            break
+        except Exception as e:
+            log(f"Error downloading channel {channel_id}: {e}")
+            if attempt < retries - 1:
+                log(f"Retrying in {wait_time} seconds...")
+                time.sleep(wait_time)
+
 def archive_youtube(id_type, id_value, output_path):
     if id_type == 'video':
         download_video(id_value, output_path)
     elif id_type == 'playlist':
         download_playlist(id_value, output_path)
+    elif id_type == 'channel':
+        download_channel(id_value, output_path)
     else:
-        log("Invalid ID type. Use 'video' or 'playlist'.")
+        log("Invalid ID type. Use 'video', 'playlist', or 'channel'.")
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
-        log("Usage: python youtube_archiver.py [video|playlist] <ID> <output_path>")
+        log("Usage: python youtube_archiver.py [video|playlist|channel] <ID> <output_path>")
         sys.exit(1)
 
     id_type = sys.argv[1]
