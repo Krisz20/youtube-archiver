@@ -6,17 +6,15 @@ import yt_dlp
 def log(message):
     print(f"[youtube-archiver] {message}")
 
-def download_video(video_id, output_path, retries=3, wait_time=60):
-    yt_url = f'https://www.youtube.com/watch?v={video_id}'
-
+def download_content(url, output_path, retries=3, wait_time=60, custom_template=None):
     for attempt in range(retries):
         try:
             ydl_opts = {
                 'format': 'bestvideo[height<=2160]+bestaudio/best',
-                'outtmpl': os.path.join(output_path, '%(title)s.%(ext)s'),
+                'outtmpl': os.path.join(output_path, custom_template if custom_template else '%(title)s.%(ext)s'),
                 'merge_output_format': 'mp4',
                 'ignoreerrors': True,
-                'concurrent_fragment_downloads': 8,
+                'concurrent_fragment_downloads': os.cpu_count(),
                 'postprocessors': [
                     {
                         'key': 'EmbedThumbnail',
@@ -33,94 +31,25 @@ def download_video(video_id, output_path, retries=3, wait_time=60):
             }
 
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                ydl.download([yt_url])
-            log(f"Downloaded video in highest available resolution: {yt_url}")
+                ydl.download([url])
+            log(f"Downloaded content: {url}")
             break
         except Exception as e:
-            log(f"Error downloading video {video_id}: {e}")
-            if attempt < retries - 1:
-                log(f"Retrying in {wait_time} seconds...")
-                time.sleep(wait_time)
-
-def download_playlist(playlist_id, output_path, retries=3, wait_time=60):
-    playlist_url = f'https://www.youtube.com/playlist?list={playlist_id}'
-
-    for attempt in range(retries):
-        try:
-            ydl_opts = {
-                'format': 'bestvideo[height<=2160]+bestaudio/best',
-                'outtmpl': os.path.join(output_path, '%(playlist)s/%(title)s.%(ext)s'),
-                'merge_output_format': 'mp4',
-                'ignoreerrors': True,
-                'concurrent_fragment_downloads': 8,
-                'postprocessors': [
-                    {
-                        'key': 'EmbedThumbnail',
-                        'already_have_thumbnail': False
-                    },
-                    {
-                        'key': 'FFmpegMetadata',
-                        'add_chapters': True,
-                        'add_infojson': 'if_exists',
-                        'add_metadata': True
-                    }
-                ],
-                'writethumbnail': True
-            }
-
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                ydl.download([playlist_url])
-            log(f"Downloaded playlist in highest available resolution: {playlist_url}")
-            break
-        except Exception as e:
-            log(f"Error downloading playlist {playlist_id}: {e}")
-            if attempt < retries - 1:
-                log(f"Retrying in {wait_time} seconds...")
-                time.sleep(wait_time)
-
-def download_channel(channel_id, output_path, retries=3, wait_time=60):
-    channel_url = f'https://www.youtube.com/c/{channel_id}'
-
-    for attempt in range(retries):
-        try:
-            ydl_opts = {
-                'format': 'bestvideo[height<=2160]+bestaudio/best',
-                'outtmpl': os.path.join(output_path, '%(uploader)s/%(title)s.%(ext)s'),
-                'merge_output_format': 'mp4',
-                'ignoreerrors': True,
-                'concurrent_fragment_downloads': 32,
-                'postprocessors': [
-                    {
-                        'key': 'EmbedThumbnail',
-                        'already_have_thumbnail': False
-                    },
-                    {
-                        'key': 'FFmpegMetadata',
-                        'add_chapters': True,
-                        'add_infojson': 'if_exists',
-                        'add_metadata': True
-                    }
-                ],
-                'writethumbnail': True
-            }
-
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                ydl.download([channel_url])
-            log(f"Downloaded all videos from channel: {channel_url}")
-            break
-        except Exception as e:
-            log(f"Error downloading channel {channel_id}: {e}")
+            log(f"Error downloading content from {url}: {e}")
             if attempt < retries - 1:
                 log(f"Retrying in {wait_time} seconds...")
                 time.sleep(wait_time)
 
 def archive_youtube(id_type, id_value, output_path):
     if id_type == 'video':
-        download_video(id_value, output_path)
+        yt_url = f'https://www.youtube.com/watch?v={id_value}'
+        download_content(yt_url, output_path)
     elif id_type == 'playlist':
-        download_playlist(id_value, output_path)
+        playlist_url = f'https://www.youtube.com/playlist?list={id_value}'
+        download_content(playlist_url, output_path, custom_template='%(playlist)s/%(title)s.%(ext)s')
     elif id_type == 'channel':
-        download_channel(id_value, output_path)
+        channel_url = f'https://www.youtube.com/c/{id_value}'
+        download_content(channel_url, output_path, custom_template='%(uploader)s/%(title)s.%(ext)s')
     else:
         log("Invalid ID type. Use 'video', 'playlist', or 'channel'.")
 
