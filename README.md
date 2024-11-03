@@ -15,9 +15,9 @@ A Python tool to archive YouTube videos and playlists by downloading them in the
 Before running the project, ensure you have the following installed:
 
 - **Python 3.x**: You can download it from [Python.org](https://www.python.org/).
-- **yt-dlp**: Install via `pip`:
+- **Dependencies**: Install via `pip` using the `requirements.txt` file:
   ```bash
-  pip install yt-dlp
+  pip install -r requirements.txt
   ```
 - **FFmpeg**: Required for handling media files. Download and set up FFmpeg from [FFmpeg.org](https://ffmpeg.org/download.html).
 
