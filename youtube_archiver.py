@@ -13,7 +13,7 @@ def download_content(url, output_path, retries=3, wait_time=60, custom_template=
                 'format': 'bestvideo[height<=2160]+bestaudio/best',
                 'outtmpl': os.path.join(output_path, custom_template if custom_template else '%(title)s.%(ext)s'),
                 'merge_output_format': 'mp4',
-                'ignoreerrors': True,
+                'ignoreerrors': 'only_download',
                 'concurrent_fragment_downloads': os.cpu_count(),
                 'postprocessors': [
                     {
@@ -31,14 +31,15 @@ def download_content(url, output_path, retries=3, wait_time=60, custom_template=
             }
 
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                ydl.download([url])
+                return_code = ydl.download([url])
             log(f"Downloaded content: {url}")
-            break
+            return return_code
         except Exception as e:
             log(f"Error downloading content from {url}: {e}")
             if attempt < retries - 1:
                 log(f"Retrying in {wait_time} seconds...")
                 time.sleep(wait_time)
+    return 1
 
 def archive_youtube(id_type, id_value, output_path):
     if id_type == 'video':
@@ -48,8 +49,18 @@ def archive_youtube(id_type, id_value, output_path):
         playlist_url = f'https://www.youtube.com/playlist?list={id_value}'
         download_content(playlist_url, output_path, custom_template='%(playlist)s/%(title)s.%(ext)s')
     elif id_type == 'channel':
-        channel_url = f'https://www.youtube.com/c/{id_value}'
-        download_content(channel_url, output_path, custom_template='%(uploader)s/%(title)s.%(ext)s')
+        channel_urls = [
+            f'https://www.youtube.com/c/{id_value}',
+            f'https://www.youtube.com/channel/{id_value}',
+            f'https://www.youtube.com/@{id_value}'
+        ]
+        
+        for channel_url in channel_urls:
+            return_code = download_content(channel_url, output_path, custom_template='%(uploader)s/%(title)s.%(ext)s')
+            if return_code == 0:
+                break
+            else:
+                log(f"Failed to download content from {channel_url}.")
     else:
         log("Invalid ID type. Use 'video', 'playlist', or 'channel'.")
 
