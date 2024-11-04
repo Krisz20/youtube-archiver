@@ -6,7 +6,7 @@ import yt_dlp
 def log(message):
     print(f"[youtube-archiver] {message}")
 
-def download_content(url, output_path, retries=3, wait_time=60, custom_template=None):
+def download_content(url, output_path, retries=3, wait_time=60, custom_template=None, browser=None):
     for attempt in range(retries):
         try:
             ydl_opts = {
@@ -30,6 +30,9 @@ def download_content(url, output_path, retries=3, wait_time=60, custom_template=
                 'writethumbnail': True
             }
 
+            if browser:
+                ydl_opts['cookiesfrombrowser'] = (browser, None, None, None)
+
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 return_code = ydl.download([url])
             log(f"Downloaded content: {url}")
@@ -41,13 +44,13 @@ def download_content(url, output_path, retries=3, wait_time=60, custom_template=
                 time.sleep(wait_time)
     return 1
 
-def archive_youtube(id_type, id_value, output_path):
+def archive_youtube(id_type, id_value, output_path, browser=None):
     if id_type == 'video':
         yt_url = f'https://www.youtube.com/watch?v={id_value}'
-        download_content(yt_url, output_path)
+        download_content(yt_url, output_path, browser=browser)
     elif id_type == 'playlist':
         playlist_url = f'https://www.youtube.com/playlist?list={id_value}'
-        download_content(playlist_url, output_path, custom_template='%(playlist)s/%(title)s.%(ext)s')
+        download_content(playlist_url, output_path, custom_template='%(playlist)s/%(title)s.%(ext)s', browser=browser)
     elif id_type == 'channel':
         channel_urls = [
             f'https://www.youtube.com/c/{id_value}',
@@ -56,7 +59,7 @@ def archive_youtube(id_type, id_value, output_path):
         ]
         
         for channel_url in channel_urls:
-            return_code = download_content(channel_url, output_path, custom_template='%(uploader)s/%(title)s.%(ext)s')
+            return_code = download_content(channel_url, output_path, custom_template='%(uploader)s/%(title)s.%(ext)s', browser=browser)
             if return_code == 0:
                 break
             else:
@@ -65,12 +68,13 @@ def archive_youtube(id_type, id_value, output_path):
         log("Invalid ID type. Use 'video', 'playlist', or 'channel'.")
 
 if __name__ == "__main__":
-    if len(sys.argv) != 4:
-        log("Usage: python youtube_archiver.py [video|playlist|channel] <ID> <output_path>")
+    if len(sys.argv) not in [4, 5]:
+        log("Usage: python youtube_archiver.py [video|playlist|channel] <ID> <output_path> [browser_name]")
         sys.exit(1)
 
     id_type = sys.argv[1]
     id_value = sys.argv[2]
     output_path = sys.argv[3]
+    browser = sys.argv[4] if len(sys.argv) == 5 else None
 
-    archive_youtube(id_type, id_value, output_path)
+    archive_youtube(id_type, id_value, output_path, browser)

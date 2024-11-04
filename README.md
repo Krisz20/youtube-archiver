@@ -43,7 +43,7 @@ brew install ffmpeg
 Run the script with the following format:
 
 ```bash
-python youtube_archiver.py [video|playlist|channel] <ID> <output_path>
+python youtube_archiver.py [video|playlist|channel] <ID> <output_path> [browser_name]
 ```
 
 ### Options
@@ -59,6 +59,8 @@ The `<ID>` refers to either:
 - The channel ID for channels.
 
 The `<output_path>` is the directory where the downloaded videos will be saved.
+
+The `[browser_name]` argument is optional and can be used to specify the browser for downloading and accessing age-restricted content through cookies. The supported browsers are: brave, chrome, chromium, edge, firefox, opera, safari, vivaldi and whale.
 
 ## Troubleshooting
 
